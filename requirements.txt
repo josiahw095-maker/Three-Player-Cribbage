@@ -1,0 +1,5 @@
+# Core engine uses only the Python standard library.
+# Optional, for extending experiments:
+# numpy
+# matplotlib   # plotting the luck-vs-skill convergence curve
+# pytest       # nicer test runner

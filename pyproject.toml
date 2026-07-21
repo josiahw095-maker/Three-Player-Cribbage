@@ -1,0 +1,9 @@
+[project]
+name = "cribbage-sim"
+version = "0.1.0"
+description = "Three-handed cribbage engine for studying luck vs skill and the kingmaker problem"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools.packages.find]
+include = ["cribbage*"]
