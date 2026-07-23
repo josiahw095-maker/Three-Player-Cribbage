@@ -6,10 +6,36 @@ that edge concentrates as you aggregate more games.
 """
 
 from __future__ import annotations
+import math
 import random
 from collections import Counter
 
 from .game import play_game
+
+
+def win_rate_stats(wins: int, n_games: int, expected: float = 1 / 3) -> dict:
+    """Significance of an observed win count against a fair-share baseline.
+
+    Null hypothesis: no skill edge, so `wins` ~ Binomial(n_games, expected).
+    The standard error of the win-rate estimate shrinks as 1/sqrt(n_games), so
+    a fixed-size deviation from `expected` becomes more significant (larger z,
+    smaller p) purely by playing more games, even with no rule changes. `z` is
+    how many standard errors the observed rate sits from `expected`; `p_value`
+    is the two-tailed normal-approximation p-value for that z.
+    """
+    observed = wins / n_games
+    se = math.sqrt(expected * (1 - expected) / n_games)
+    z = (observed - expected) / se
+    p_value = math.erfc(abs(z) / math.sqrt(2))
+    return {
+        "wins": wins,
+        "n_games": n_games,
+        "observed": observed,
+        "expected": expected,
+        "se": se,
+        "z": z,
+        "p_value": p_value,
+    }
 
 
 def run_tournament(agents, n_games: int, seed: int = 0) -> Counter:
@@ -36,3 +62,11 @@ def win_rate_edge(strong, field, n_games=2000, seed=0):
     agents = [strong, field, field] if not isinstance(field, list) else [strong] + field
     wins = run_tournament(agents, n_games, seed)
     return wins[0] / n_games
+
+
+def win_rate_edge_report(strong, field, n_games=2000, seed=0) -> dict:
+    """Like `win_rate_edge`, but also returns significance stats (see
+    `win_rate_stats`) so you can judge whether the edge is real or noise."""
+    agents = [strong, field, field] if not isinstance(field, list) else [strong] + field
+    wins = run_tournament(agents, n_games, seed)
+    return win_rate_stats(wins[0], n_games)

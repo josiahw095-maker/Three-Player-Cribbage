@@ -91,3 +91,22 @@ class GreedyAgent(Agent):
             if score > best_pts:
                 best, best_pts = c, score
         return best
+
+
+class HighestOrFifteenAgent(Agent):
+    """Myopic pegging: play the card that hits 15 if one is available,
+    otherwise play the highest-value legal card."""
+
+    name = "highest_or_15"
+
+    def __init__(self, rng: random.Random | None = None):
+        self.rng = rng or random.Random()
+
+    def discard(self, hand, is_dealer):
+        return best_discard(hand)
+
+    def play(self, legal, pile, count, state=None):
+        for c in legal:
+            if count + c.value == 15:
+                return c
+        return max(legal, key=lambda c: c.value)
